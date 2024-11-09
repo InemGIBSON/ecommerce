@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  product-service:
+    build: ./product-service
+    ports:
+      - "8001:80"
+    networks:
+      - ecommerce-network
+    depends_on:
+      - product-db
+
+  product-db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: product_db
+    networks:
+      - ecommerce-network
+    volumes:
+      - product-db-data:/var/lib/mysql
+      - ./product-service/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  order-service:
+    build: ./order-service
+    ports:
+      - "8002:80"
+    networks:
+      - ecommerce-network
+    depends_on:
+      - order-db
+
+  order-db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: order_db
+    networks:
+      - ecommerce-network
+    volumes:
+      - order-db-data:/var/lib/mysql
+      - ./order-service/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  user-service:
+    build: ./user-service
+    ports:
+      - "8003:80"
+    networks:
+      - ecommerce-network
+    depends_on:
+      - user-db
+
+  user-db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: user_db
+    networks:
+      - ecommerce-network
+    volumes:
+      - user-db-data:/var/lib/mysql
+      - ./user-service/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+networks:
+  ecommerce-network:
+    driver: bridge
+
+volumes:
+  product-db-data:
+  order-db-data:
+  user-db-data:
+
